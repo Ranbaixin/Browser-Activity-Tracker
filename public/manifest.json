@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Browser Activity Tracker Pro",
+  "version": "1.1",
+  "description": "高精度网页活动追踪器，支持 Edge/Chrome 置顶显示。",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "downloads",
+    "idle",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

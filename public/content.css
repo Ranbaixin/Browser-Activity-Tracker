@@ -1,0 +1,137 @@
+/* /public/content.css */
+#activity-tracker-root {
+  position: fixed !important;
+  top: 20px;
+  right: 20px;
+  z-index: 2147483647 !important;
+  cursor: move;
+  user-select: none;
+  font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+  pointer-events: auto !important;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+.tracker-dial-container {
+  width: 70px;
+  height: 70px;
+  background: rgba(15, 17, 20, 0.9) !important;
+  backdrop-filter: blur(12px);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.tracker-svg {
+  transform: rotate(-90deg);
+  width: 60px;
+  height: 60px;
+}
+
+.tracker-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 4;
+}
+
+.tracker-circle-progress {
+  fill: none;
+  stroke: #3b82f6;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.tracker-time-text {
+  position: absolute;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  pointer-events: none;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* 圈数角标样式 */
+.tracker-lap-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: #3b82f6;
+  color: white;
+  font-size: 9px;
+  font-weight: 900;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(15, 17, 20, 0.95);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  z-index: 2;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 右键快捷菜单样式 */
+.tracker-context-menu {
+  position: absolute;
+  background: rgba(20, 22, 26, 0.98) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 6px;
+  width: 150px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  left: 75px;
+  top: 0;
+  pointer-events: auto;
+}
+
+.menu-item {
+  padding: 8px 12px;
+  color: #f1f5f9;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s, transform 0.1s;
+  font-weight: 500;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateX(2px);
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 6px;
+}
+
+.color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+@keyframes tracker-pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+  70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.tracker-pulse {
+  animation: tracker-pulse-glow 1s infinite;
+  border-color: #3b82f6 !important;
+}

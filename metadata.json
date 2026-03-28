@@ -1,0 +1,5 @@
+{
+  "name": "Browser Activity Tracker",
+  "description": "A Manifest V3 browser extension to track and manage your digital footprint locally.",
+  "requestFramePermissions": []
+}
