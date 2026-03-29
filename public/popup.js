@@ -11,7 +11,15 @@ function formatTime(ms) {
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.action === "TIMER_TICK") {
     const el = document.getElementById('liveTimer');
-    if (el) el.innerText = `${msg.domain}: ${formatTime(msg.duration)}`;
+    if (el) {
+      if (msg.isPaused) {
+        el.innerText = `[已暂停] ${msg.domain}`;
+        el.style.color = '#94a3b8';
+      } else {
+        el.innerText = `${msg.domain}: ${formatTime(msg.duration)}`;
+        el.style.color = '#1d4ed8';
+      }
+    }
   }
 });
 
@@ -40,8 +48,9 @@ async function updateUI() {
 }
 
 async function loadSettings() {
-  const s = await chrome.storage.local.get(['clockVisible', 'clockColor', 'clockSize', 'idleTimeout', 'blacklist']);
+  const s = await chrome.storage.local.get(['clockVisible', 'clockColor', 'clockSize', 'idleTimeout', 'blacklist', 'isPaused']);
   document.getElementById('clockVisibleCheck').checked = s.clockVisible !== false;
+  document.getElementById('isPausedCheck').checked = s.isPaused === true;
   document.getElementById('clockColor').value = s.clockColor || '#3b82f6';
   document.getElementById('clockSize').value = s.clockSize || '1';
   document.getElementById('idleTimeout').value = s.idleTimeout || 30;
@@ -51,6 +60,7 @@ async function loadSettings() {
 const save = async () => {
   await chrome.storage.local.set({
     clockVisible: document.getElementById('clockVisibleCheck').checked,
+    isPaused: document.getElementById('isPausedCheck').checked,
     clockColor: document.getElementById('clockColor').value,
     clockSize: document.getElementById('clockSize').value,
     idleTimeout: parseInt(document.getElementById('idleTimeout').value) || 30,
@@ -60,7 +70,7 @@ const save = async () => {
   tabs.forEach(t => chrome.tabs.sendMessage(t.id, { action: "SETTINGS_UPDATED" }).catch(() => {}));
 };
 
-['clockVisibleCheck', 'clockColor', 'clockSize', 'idleTimeout', 'blacklist'].forEach(id => {
+['clockVisibleCheck', 'isPausedCheck', 'clockColor', 'clockSize', 'idleTimeout', 'blacklist'].forEach(id => {
   document.getElementById(id).onchange = save;
 });
 

@@ -22,7 +22,8 @@ async function getActiveTab() {
 }
 
 async function tick() {
-  const settings = await chrome.storage.local.get(['blacklist', 'idleTimeout']);
+  const settings = await chrome.storage.local.get(['blacklist', 'idleTimeout', 'isPaused']);
+  const isPaused = settings.isPaused === true;
   const blacklist = (settings.blacklist || "").split('\n').map(d => d.trim()).filter(d => d);
   const timeout = (settings.idleTimeout || 30) * 60;
 
@@ -30,7 +31,7 @@ async function tick() {
   const idleState = await chrome.idle.queryState(timeout); 
   const now = Date.now();
 
-  if (tab && (idleState === 'active' || idleState === 'idle')) {
+  if (tab && (idleState === 'active' || idleState === 'idle') && !isPaused) {
     const domain = getDomain(tab.url);
     if (blacklist.some(b => domain.includes(b))) {
       activeSession = null;
@@ -49,14 +50,19 @@ async function tick() {
       activeSession.lastTick = now;
     }
   } else {
-    activeSession = null;
+    // 如果暂停了，我们更新 lastTick 避免恢复时突然跳变大段时长
+    if (activeSession) activeSession.lastTick = now;
+    if (!tab || (idleState !== 'active' && idleState !== 'idle')) {
+      activeSession = null;
+    }
   }
 
   if (activeSession) {
     chrome.runtime.sendMessage({
       action: "TIMER_TICK",
       duration: Date.now() - activeSession.startTime,
-      domain: activeSession.domain
+      domain: activeSession.domain,
+      isPaused: isPaused
     }).catch(() => {});
   }
 }

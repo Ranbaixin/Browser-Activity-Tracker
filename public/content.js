@@ -59,11 +59,13 @@
 
     async function update() {
       if (!chrome.runtime?.id) return;
-      const s = await chrome.storage.local.get(['clockVisible', 'clockColor', 'clockSize']);
+      const s = await chrome.storage.local.get(['clockVisible', 'clockColor', 'clockSize', 'isPaused']);
       const isVisible = s.clockVisible !== false;
+      const isPaused = s.isPaused === true;
       container.style.transform = `scale(${s.clockSize || 1})`;
-      progressCircle.style.stroke = s.clockColor || '#3b82f6';
-      lapBadge.style.backgroundColor = s.clockColor || '#3b82f6';
+      progressCircle.style.stroke = isPaused ? '#94a3b8' : (s.clockColor || '#3b82f6');
+      lapBadge.style.backgroundColor = isPaused ? '#94a3b8' : (s.clockColor || '#3b82f6');
+      container.style.opacity = isPaused ? '0.7' : '1';
 
       chrome.runtime.sendMessage({ action: "GET_CURRENT_SESSION" }, (session) => {
         if (chrome.runtime.lastError || !session || !isVisible) {
@@ -72,7 +74,15 @@
         }
         const ms = Date.now() - session.startTime;
         const sec = Math.floor(ms / 1000);
-        timeText.innerText = `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`;
+        
+        if (isPaused) {
+          timeText.innerText = 'PAUSE';
+          timeText.style.fontSize = '10px';
+        } else {
+          timeText.innerText = `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`;
+          timeText.style.fontSize = '12px';
+        }
+
         const laps = Math.floor(ms / LAP_MS);
         lapBadge.innerText = laps;
         lapBadge.style.display = laps > 0 ? 'flex' : 'none';
@@ -124,9 +134,10 @@
     });
 
     // Dragging
-    let isDrag = false, sx, sy, ix, iy;
+    let isDrag = false, sx, sy, ix, iy, mouseDownTime = 0;
     root.addEventListener('mousedown', (e) => {
       if (contextMenu.contains(e.target)) return;
+      mouseDownTime = Date.now();
       isDrag = true; sx = e.clientX; sy = e.clientY;
       const r = container.getBoundingClientRect();
       ix = r.left; iy = r.top;
@@ -138,7 +149,18 @@
       container.style.top = `${iy + (e.clientY - sy)}px`;
       container.style.right = 'auto';
     });
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', async (e) => {
+      if (isDrag) {
+        const dx = Math.abs(e.clientX - sx);
+        const dy = Math.abs(e.clientY - sy);
+        // If moved less than 5px and held for less than 200ms, it's a click
+        if (dx < 5 && dy < 5 && (Date.now() - mouseDownTime < 200)) {
+          const s = await chrome.storage.local.get('isPaused');
+          await chrome.storage.local.set({ isPaused: !s.isPaused });
+          update();
+          chrome.runtime.sendMessage({ action: "SETTINGS_UPDATED" });
+        }
+      }
       isDrag = false;
       container.style.transition = 'transform 0.3s ease';
     });
